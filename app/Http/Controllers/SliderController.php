@@ -2,33 +2,33 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
+use App\Models\Slider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 
-class CategoryController extends Controller
+class SliderController extends Controller
 {
     /**
-     * Menampilkan daftar kategori.
+     * Menampilkan daftar resource.
      */
     public function index()
     {
-        $categories = Category::all();
+        $sliders = Slider::all();
 
         return response()->json([
-            'data' => $categories
+            'data' => $sliders
         ]);
     }
 
     /**
-     * Menyimpan kategori baru.
+     * Menyimpan resource yang baru dibuat.
      */
     public function store(Request $request)
     {
         // Validasi input
         $validator = Validator::make($request->all(), [
-            'nama_kategori' => 'required',
+            'nama_slider' => 'required',
             'deskripsi' => 'required',
             'gambar' => 'required|image|mimes:jpg,png,jpeg,webp|max:2048', // Batas maksimum ukuran gambar adalah 2MB
         ]);
@@ -46,58 +46,74 @@ class CategoryController extends Controller
             $input['gambar'] = 'uploads/' . $nama_gambar;
         }
 
-        $category = Category::create($input);
+        $slider = Slider::create($input);
 
         return response()->json([
-            'message' => 'Kategori berhasil disimpan.',
-            'data' => $category
+            'message' => 'Slider berhasil disimpan.',
+            'data' => $slider
         ]);
     }
 
     /**
-     * Memperbarui kategori yang ditentukan.
+     * Memperbarui resource yang ditentukan.
      */
-    public function update(Request $request, Category $category)
+    public function update(Request $request, Slider $slider)
     {
         // Validasi input
         $validator = Validator::make($request->all(), [
-            'nama_kategori' => 'required',
+            'nama_slider' => 'required',
             'deskripsi' => 'required',
             'gambar' => 'image|mimes:jpg,png,jpeg,webp|max:2048', // Batas maksimum ukuran gambar adalah 2MB
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json(
+                $validator->errors(),
+                 422
+                );
         }
 
         $input = $request->all();
 
         if ($request->hasFile('gambar')) {
+            // Hapus gambar lama jika ada
+            if (File::exists(public_path($slider->gambar))) {
+                File::delete(public_path($slider->gambar));
+            }
+
+            // Upload gambar baru
             $gambar = $request->file('gambar');
             $nama_gambar = time() . '_' . $gambar->getClientOriginalName();
             $gambar->move(public_path('uploads'), $nama_gambar);
             $input['gambar'] = 'uploads/' . $nama_gambar;
+        } else {
+            unset($input['gambar']);
         }
 
-        $category->update($input);
+        // Update resource
+        $slider->update($input);
 
         return response()->json([
-            'message' => 'Kategori berhasil diperbarui.',
-            'data' => $category
+            'message' => 'Slider berhasil diperbarui.',
+            'data' => $slider
         ]);
     }
 
     /**
-     * Menghapus kategori yang ditentukan.
+     * Menghapus resource yang ditentukan.
      */
-    public function destroy(Category $category)
+    public function destroy(Slider $slider)
     {
-        File::delete('uploads/' . $category->gambar);
+        // Hapus gambar dari penyimpanan
+        if (File::exists(public_path($slider->gambar))) {
+            File::delete(public_path($slider->gambar));
+        }
 
-        $category->delete();
+        // Hapus data dari database
+        $slider->delete();
 
         return response()->json([
-            'message' => 'succes'
+            'message' => 'Slider berhasil dihapus.'
         ]);
     }
 }
