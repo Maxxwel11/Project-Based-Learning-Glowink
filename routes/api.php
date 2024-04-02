@@ -2,9 +2,12 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReviewController; // Menggunakan ReviewController
 use App\Http\Controllers\SliderController;
 use App\Http\Controllers\SubcategoryController;
+use App\Http\Controllers\TestimoniController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,7 +29,10 @@ Route::group([
         'categories' => CategoryController::class,
         'subcategories' => SubcategoryController::class,
         'sliders'=> SliderController::class,
-        'products'=> ProductController::class
+        'products'=> ProductController::class,
+        'members'=>MemberController::class,
+        'testimoni'=>TestimoniController::class,
+        'reviews'=>ReviewController::class, // Menggunakan ReviewController
     ]);
 });
 Route::put('sliders/{slider}', [SliderController::class, 'update']);
